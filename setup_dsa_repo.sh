@@ -2,21 +2,15 @@
 
 # Script to set up Python DSA Repository Structure
 # Author: Generated for educational DSA repository
-# Usage: ./setup_dsa_repo.sh [directory_name]
+# Usage: ./setup_dsa_repo.sh
 
 # Color codes for output
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-REPO_NAME=${1:-python-dsa-guide}
-
-echo -e "${BLUE}Creating Python DSA Repository: $REPO_NAME${NC}"
+echo -e "${BLUE}Creating Python DSA structure in current directory...${NC}"
 echo "================================================"
-
-# Create root directory
-mkdir -p "$REPO_NAME"
-cd "$REPO_NAME"
 
 # Create main directories
 echo -e "${GREEN}Creating directory structure...${NC}"
@@ -163,13 +157,12 @@ touch practice_problems/projects/05_lru_cache/README.md
 touch practice_problems/projects/05_lru_cache/solution.py
 
 echo -e "${BLUE}Directory structure created successfully!${NC}"
-echo -e "${BLUE}Repository location: $(pwd)${NC}"
+echo -e "${BLUE}Location: $(pwd)${NC}"
 echo ""
 echo "Next steps:"
-echo "1. cd $REPO_NAME"
-echo "2. Initialize git: git init"
-echo "3. Initialize pixi: pixi init"
-echo "4. Add Python: pixi add python=3.13"
-echo "5. Add dependencies: pixi add numpy pandas pytest"
+echo "1. Initialize git (if needed): git init"
+echo "2. Initialize pixi: pixi init"
+echo "3. Add Python: pixi add python=3.13"
+echo "4. Add dependencies: pixi add numpy pandas pytest"
 echo ""
 echo -e "${GREEN}Happy coding!${NC}"
