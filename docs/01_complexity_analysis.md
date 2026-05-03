@@ -39,9 +39,49 @@ O(n!):       9.3 × 10¹⁵⁷ operations
 
 Time complexity measures how the number of operations scales with input size.
 
+When analyzing time complexity, focus on how the running time grows as $n$ gets large, not the exact number of CPU instructions. Different machines may run code at different speeds, but the growth trend is what matters.
+
+In practice, time complexity usually counts the number of:
+
+- Comparisons
+- Assignments
+- Arithmetic operations
+- Loop iterations
+- Recursive calls
+
+We do **not** usually count every tiny low-level detail. Instead, we look for the dominant pattern that controls growth.
+
+### How to Think About Time Complexity
+
+Ask these questions:
+
+1. What is the input size $n$?
+2. What is the core operation being repeated?
+3. How many times does that operation happen?
+4. Which term grows fastest as $n$ increases?
+
+For example:
+
+```python
+def print_pairs(arr):
+    for i in range(len(arr)):
+        for j in range(len(arr)):
+            print(arr[i], arr[j])
+```
+
+If `arr` has length $n$:
+
+- Outer loop runs $n$ times
+- Inner loop runs $n$ times for each outer iteration
+- Total work is $n \cdot n = n^2$
+
+So the time complexity is O(n²).
+
 ### O(1) - Constant Time
 
 **Operations that always take the same time**, regardless of input size.
+
+Constant time does **not** mean "instant". It means the work does not grow with $n$.
 
 ```python
 def get_first_element(arr):
@@ -62,9 +102,22 @@ def add_to_set(s, element):
 - Hash table operations (average case)
 - Simple arithmetic operations
 
+**Key idea:**
+Even if an O(1) operation takes 20 machine steps instead of 2, it is still O(1) because the number of steps stays bounded.
+
 ### O(log n) - Logarithmic Time
 
 **Operations that halve the problem size** with each step.
+
+Logarithmic time is efficient because each step removes a large fraction of the remaining work.
+
+If a problem size repeatedly changes like this:
+
+$$
+n \to n/2 \to n/4 \to n/8 \to \dots
+$$
+
+then the number of steps is about $\log_2 n$.
 
 ```python
 def binary_search(arr, target):
@@ -96,9 +149,14 @@ def find_power_of_two(n):
 - Balanced tree operations
 - Divide and conquer algorithms
 
+**Rule of thumb:**
+If each iteration shrinks the search space by a constant factor, the runtime is often O(log n).
+
 ### O(n) - Linear Time
 
 **Operations that scale directly with input size**.
+
+If you must inspect each element once, the runtime is usually linear.
 
 ```python
 def find_max(arr):
@@ -132,9 +190,22 @@ def contains_value(arr, target):
 - Linear search
 - Simple array/list operations
 
+**Important note:**
+Multiple separate linear passes are still O(n):
+
+$$
+O(n) + O(n) = O(2n) = O(n)
+$$
+
 ### O(n log n) - Linearithmic Time
 
 **Efficient sorting algorithms**.
+
+This often appears when:
+
+- The problem is divided into smaller pieces
+- There are O(log n) levels of work
+- Each level performs O(n) total processing
 
 ```python
 def merge_sort(arr):
@@ -170,9 +241,14 @@ def merge(left, right):
 - Efficient sorting (merge sort, quick sort, heap sort)
 - Divide and conquer with linear merge
 
+**Mental model:**
+"Do linear work across logarithmically many levels."
+
 ### O(n²) - Quadratic Time
 
 **Nested loops** over the data.
+
+Quadratic algorithms become slow quickly as input grows. Doubling the input size roughly quadruples the amount of work.
 
 ```python
 def bubble_sort(arr):
@@ -210,9 +286,37 @@ def find_duplicates_optimized(arr):
 - Comparing all pairs
 - Simple sorting algorithms
 
+**Warning sign:**
+If every item is compared with many or all other items, suspect O(n²).
+
+This is often acceptable for small inputs, but it usually becomes impractical for large ones.
+
+### O(n³) - Cubic Time
+
+**Three levels of dependent iteration**.
+
+```python
+def count_triplets(arr):
+    count = 0
+    for i in range(len(arr)):
+        for j in range(len(arr)):
+            for k in range(len(arr)):
+                count += 1
+    return count
+```
+
+This runs in O(n³) time because there are three nested loops of size $n$.
+
+**Where it appears:**
+- Brute-force triplet checking
+- Some matrix algorithms
+- Naive graph algorithms on dense data
+
 ### O(2ⁿ) - Exponential Time
 
 **Each additional input doubles the operations**.
+
+Exponential complexity is usually a sign that the algorithm explores many combinations or branches.
 
 ```python
 def fibonacci_recursive(n):
@@ -249,11 +353,78 @@ def fibonacci_dp(n):
 - Brute force solutions
 - Subset generation
 
+**Why it becomes infeasible fast:**
+
+Adding one more input element may nearly double the work. That means even modest increases in $n$ can make the algorithm unusable.
+
+### Time Complexity Pitfalls
+
+#### Nested loops are not always O(n²)
+
+```python
+def two_pointer_scan(arr):
+    left, right = 0, len(arr) - 1
+    while left < right:
+        left += 1
+        right -= 1
+```
+
+This is O(n), not O(n²), because the pointers move toward each other only a total of O(n) times.
+
+#### Different inputs should use different variables
+
+```python
+def compare_all(a, b):
+    for x in a:
+        for y in b:
+            print(x, y)
+```
+
+This is O(nm), not necessarily O(n²), because the input sizes may be different.
+
+#### Early exits can improve best case but not worst case
+
+```python
+def contains_zero(arr):
+    for value in arr:
+        if value == 0:
+            return True
+    return False
+```
+
+- Best case: O(1)
+- Worst case: O(n)
+
+When no case is specified, Big O usually refers to the worst case.
+
 ## Space Complexity
 
 Space complexity measures **memory usage** as input size grows.
 
+Just like time complexity tracks growth in operations, space complexity tracks growth in memory consumption.
+
+This usually includes:
+
+- Variables
+- Temporary arrays or lists
+- Hash maps / sets
+- Recursion call stack
+- Any extra storage created by the algorithm
+
+### Input Space vs Auxiliary Space
+
+It is useful to distinguish between:
+
+- **Input space**: memory needed to store the input itself
+- **Auxiliary space**: extra memory used beyond the input
+
+In interviews and algorithm analysis, people often care most about **auxiliary space**.
+
+For example, if a function receives an array of size $n$ and uses only a few extra variables, we usually call it O(1) auxiliary space, even though the input already occupies O(n) memory.
+
 ### O(1) - Constant Space
+
+The algorithm uses a fixed amount of extra memory, regardless of input size.
 
 ```python
 def swap_elements(arr, i, j):
@@ -268,7 +439,16 @@ def sum_iterative(n):
     return total
 ```
 
+**Characteristics:**
+- A fixed number of variables
+- In-place updates
+- No growing helper data structures
+
+An algorithm can still take O(n) time while using O(1) extra space.
+
 ### O(n) - Linear Space
+
+The amount of extra memory grows in proportion to input size.
 
 ```python
 def create_doubled_array(arr):
@@ -288,7 +468,15 @@ def fibonacci_memoization(n, memo=None):
     return memo[n]
 ```
 
+**Common causes:**
+- Building a new list or copy of the input
+- Storing memoization tables
+- Using sets or dictionaries to track seen values
+- Breadth-first or depth-first traversal structures in some cases
+
 ### O(log n) - Logarithmic Space
+
+This often comes from recursion depth when the problem size shrinks by a factor each time.
 
 ```python
 def binary_search_recursive(arr, target, left=0, right=None):
@@ -308,6 +496,64 @@ def binary_search_recursive(arr, target, left=0, right=None):
     else:
         return binary_search_recursive(arr, target, left, mid - 1)
 ```
+
+Each recursive call adds one frame to the call stack, but the number of calls present at once is only O(log n).
+
+### O(n) Recursive Space vs O(1) Iterative Space
+
+Two solutions can have the same time complexity but different space complexity.
+
+```python
+def sum_recursive(n):
+    if n == 0:
+        return 0
+    return n + sum_recursive(n - 1)
+```
+
+This uses O(n) space because there are O(n) recursive stack frames.
+
+By contrast, the earlier iterative version uses O(1) extra space.
+
+### In-Place vs Out-of-Place Algorithms
+
+- **In-place** algorithms modify the original structure with little extra memory
+- **Out-of-place** algorithms build new structures
+
+Example:
+
+```python
+def reverse_in_place(arr):
+    left, right = 0, len(arr) - 1
+    while left < right:
+        arr[left], arr[right] = arr[right], arr[left]
+        left += 1
+        right -= 1
+```
+
+This uses O(1) extra space.
+
+```python
+def reversed_copy(arr):
+    return arr[::-1]
+```
+
+This uses O(n) extra space because it creates a new array.
+
+### Space Complexity Pitfalls
+
+#### Recursion uses memory
+
+Even if a recursive function creates no lists or dictionaries, the call stack still consumes space.
+
+#### Output size may dominate space usage
+
+If an algorithm must return all subsets of a set, the output itself already requires O(2ⁿ) space.
+
+#### Python slicing can allocate new memory
+
+Code like `arr[:mid]` often creates a new list, which affects space usage.
+
+For example, a recursive algorithm may have a simple time recurrence but higher-than-expected space cost if it repeatedly copies slices.
 
 ## Analyzing Complexity
 
@@ -423,9 +669,35 @@ def quick_sort(arr):
 
 ## Amortized Analysis
 
-Some operations have varying costs, but **average out over time**.
+Some operations have varying costs, but **average out over time across a sequence of operations**.
+
+Amortized analysis asks:
+
+> If we perform an operation many times, what is the average cost per operation in the **worst valid sequence**?
+
+This is different from average-case analysis:
+
+- **Average-case** assumes something about the input distribution
+- **Amortized** makes no randomness assumption; it spreads occasional expensive operations across many cheap ones
+
+In other words, an amortized bound says that while a single operation might be expensive, **it cannot happen too often without many inexpensive operations around it**.
+
+### When Amortized Analysis Is Useful
+
+Amortized analysis often appears in data structures where work is done in bursts:
+
+- Dynamic arrays that occasionally resize
+- Hash tables that occasionally rehash
+- Stacks with occasional batch operations
+- Union-find with path compression
 
 ### Dynamic Array (Python List)
+
+The classic example is appending to a dynamic array.
+
+- Most `append()` operations place the element into unused capacity: O(1)
+- Once the array is full, the implementation allocates a bigger array and copies old elements: O(n)
+- That resize is expensive, but it does **not** happen on every append
 
 ```python
 # Appending to a list
@@ -438,6 +710,153 @@ for i in range(1000):
 - Most appends: O(1)
 - Occasional resize: O(n)
 - **Amortized**: O(1) per append
+
+### Why Appending Is Still O(1) Amortized
+
+Suppose the array doubles in size whenever it fills up.
+
+If capacities grow like this:
+
+1, 2, 4, 8, 16, ...
+
+then the total number of copied elements after $n$ appends is:
+
+$$
+1 + 2 + 4 + 8 + \dots + n/2 < n
+$$
+
+So across $n$ appends:
+
+- We do $n$ direct insertions
+- We do fewer than $n$ total copied moves during resizes
+
+That gives total work of less than $2n$, so the average cost per append is:
+
+$$
+\frac{O(n)}{n} = O(1)
+$$
+
+This is the key amortized idea: the expensive resize cost is paid for by many earlier cheap appends.
+
+### Small Resize Walkthrough
+
+Imagine starting with capacity 1:
+
+| Append | Capacity Before | Resize? | Cost |
+|--------|------------------|---------|------|
+| 1st | 1 | No | O(1) |
+| 2nd | 1 | Yes, copy 1 item | O(1) overall but resize step is O(1) |
+| 3rd | 2 | Yes, copy 2 items | O(2) |
+| 4th | 4 | No | O(1) |
+| 5th | 4 | Yes, copy 4 items | O(4) |
+| 6th | 8 | No | O(1) |
+| 7th | 8 | No | O(1) |
+| 8th | 8 | No | O(1) |
+
+Some operations spike in cost, but the spikes are rare enough that the long-run average stays constant.
+
+### Another Example: Stack with `multipop`
+
+```python
+class SimpleStack:
+    def __init__(self):
+        self.items = []
+
+    def push(self, value):
+        self.items.append(value)  # O(1)
+
+    def pop(self):
+        if self.items:
+            return self.items.pop()  # O(1)
+        return None
+
+    def multipop(self, k):
+        while self.items and k > 0:
+            self.items.pop()
+            k -= 1
+```
+
+At first glance, `multipop(k)` looks like O(k), which is true for one call. But over a sequence of operations:
+
+- Each element can be pushed once
+- Each element can be popped at most once
+
+So if we perform many `push`, `pop`, and `multipop` operations, the total number of pops is bounded by the total number of pushes. That makes the amortized cost per stack operation O(1).
+
+### Common Ways to Prove Amortized Bounds
+
+There are three standard techniques:
+
+#### 1. Aggregate Method
+
+Add up the total cost of a sequence of $n$ operations, then divide by $n$.
+
+This is what we did for dynamic arrays.
+
+#### 2. Accounting Method
+
+Assign an artificial "charge" to cheap operations so they prepay for future expensive ones.
+
+For example, you might pretend each `append()` costs 3 units:
+
+- 1 unit pays for the insertion now
+- 2 units are saved as credit
+
+When a resize happens, the stored credits pay for copying elements.
+
+#### 3. Potential Method
+
+Track stored energy in the data structure with a potential function $\Phi$.
+
+Cheap operations may increase potential, and expensive operations may decrease it. The amortized cost is:
+
+$$
+	ext{amortized cost} = \text{actual cost} + \Delta \Phi
+$$
+
+This method is common in more advanced data structures.
+
+### Important Takeaway
+
+Amortized analysis does **not** say every operation is cheap.
+
+It says that for any long enough valid sequence, the **average cost per operation stays bounded**, even if a few individual operations are expensive.
+
+That is why we say:
+
+- A single `append()` can be O(n)
+- Repeated `append()` operations are O(1) amortized
+
+```python
+# Example interpretation:
+# Performing n appends takes O(n) total time,
+# so the average cost per append is O(1) amortized.
+```
+
+## Common Python Operation Comparison
+
+Here is a quick reference for common operations. These are typical costs in practice, though exact behavior depends on implementation details and edge cases.
+
+| Operation | Time Complexity | Extra Space | Notes |
+|-----------|-----------------|-------------|-------|
+| `arr[i]` | O(1) | O(1) | Direct index access |
+| `arr.append(x)` | O(1) amortized | O(1) amortized | Occasional resize makes one append O(n) |
+| `arr.pop()` | O(1) | O(1) | Popping from end of list |
+| `arr.insert(0, x)` | O(n) | O(1) | Must shift elements |
+| `x in arr` | O(n) | O(1) | Linear search in list |
+| `arr[a:b]` | O(k) | O(k) | Copies a slice of length $k$ |
+| `sorted(arr)` | O(n log n) | O(n) | Returns a new sorted list |
+| `dict[key]` lookup | O(1) average | O(1) | Worst case can degrade |
+| `key in set_obj` | O(1) average | O(1) | Hash-based membership check |
+| String concatenation in loop | Often O(n²) total | O(n) or more | Repeated copying can be expensive |
+
+### Quick Interpretation Tips
+
+- Lists are great for **append**, indexed access, and iteration
+- Lists are poor for **front insertion** or **front deletion**
+- Sets and dictionaries are excellent for fast membership and lookup on average
+- Slicing looks compact, but it usually creates a copy
+- Built-in sorting is usually much better than writing a naive quadratic sort
 
 ## Practice Problems
 
@@ -485,6 +904,7 @@ Which is more efficient for n = 1,000,000?
 - **Big O** describes upper bound of growth rate
 - **Drop constants** and lower-order terms
 - **Consider worst case** unless specified
+- **Use amortized analysis** when occasional expensive operations are spread across many cheap ones
 - **Time vs Space** - often a trade-off
 - **Choose the right complexity** for your use case
 
